@@ -44,8 +44,8 @@ func signHost(ca tls.Certificate, hosts []string) (cert *tls.Certificate, err er
 	if x509ca, err = x509.ParseCertificate(ca.Certificate[0]); err != nil {
 		return
 	}
-	start := time.Unix(0, 0)
-	end, err := time.Parse("2006-01-02", "2049-12-31")
+	start := time.Now().AddDate(0, -1, 0)
+	end := time.Now().AddDate(0, 6, 0)
 	if err != nil {
 		panic(err)
 	}
@@ -56,13 +56,14 @@ func signHost(ca tls.Certificate, hosts []string) (cert *tls.Certificate, err er
 		SerialNumber: serial,
 		Issuer:       x509ca.Subject,
 		Subject: pkix.Name{
-			Organization: []string{"GoProxy untrusted MITM proxy Inc"},
+			Country:            []string{"US"},
+			Organization:       []string{"Saul Goodman Net Co,,Ltd"},
+			OrganizationalUnit: []string{"IT Department"},
 		},
-		NotBefore: start,
-		NotAfter:  end,
-
-		KeyUsage:              x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
-		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+		NotBefore:             start,
+		NotAfter:              end,
+		KeyUsage:              x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature | x509.KeyUsageDataEncipherment,
+		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageAny},
 		BasicConstraintsValid: true,
 	}
 	for _, h := range hosts {
